@@ -1,0 +1,18 @@
+services:
+  fte-service:
+    build:
+      context: ./
+    ports:
+      - "${PORT:-8095}:${PORT:-8095}"
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-8095}
+    restart: unless-stopped
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
