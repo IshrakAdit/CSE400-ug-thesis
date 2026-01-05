@@ -1,5 +1,5 @@
 """
-Adaptive Hybrid FT Engine - full rewritten main.py
+Adaptive Hybrid FT Engine
 
 Run:
     uvicorn adaptive_ft_engine_main:app --reload --port 8080
@@ -11,13 +11,11 @@ Endpoints:
     POST /metrics/ingest
 
 Notes:
-- Kubernetes orchestrator remains a dry-run stub unless KUBE_ENABLED=true.
 - Core decision: EV = (ΔS * SLA_penalty * remaining_factor) - cost
   where remaining_factor = (1 - progress) ** GAMMA
 
 Tunables (class FaultToleranceEngine):
 - GAMMA: importance of remaining work
-- REPLICA_COST_FACTOR: multiplies replicate cost to account for infra overhead
 - MIN_EV_TO_ACT: minimum EV ($) to perform any action
 
 """
@@ -36,7 +34,7 @@ from pydantic import BaseModel, Field, validator
 # ---------------------------
 # Logging
 # ---------------------------
-logging.basicConfig(level=os.getenv("FT_LOG_LEVEL", "INFO"))
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("ft-engine")
 
 # ---------------------------
@@ -47,10 +45,6 @@ class Config:
     kube_namespace: str = os.getenv("KUBE_NAMESPACE", "default")
     checkpoint_base_uri: str = os.getenv("CHECKPOINT_BASE_URI", "s3://checkpoints")
 
-
-# ---------------------------
-# Domain Models
-# ---------------------------
 class ActionType(str, Enum):
     replicate = "replicate"
     checkpoint = "checkpoint"
@@ -107,10 +101,6 @@ class MetricRecord(BaseModel):
     node_id: Optional[str] = None
     message: Optional[str] = None
 
-
-# ---------------------------
-# Lightweight Online Learner
-# ---------------------------
 class OnlineLearner:
     """
     Tracks EWMA priors for action effectiveness and cost.
@@ -165,10 +155,6 @@ class OnlineLearner:
 
 learner = OnlineLearner()
 
-
-# ---------------------------
-# Orchestrator (Kubernetes) - safe stubs
-# ---------------------------
 class KubernetesOrchestrator:
     def __init__(self, namespace: str):
         self.enabled = Config.kube_enabled
@@ -220,10 +206,6 @@ class KubernetesOrchestrator:
 
 orchestrator = KubernetesOrchestrator(Config.kube_namespace)
 
-
-# ---------------------------
-# Core FT Engine
-# ---------------------------
 class FaultToleranceEngine:
     def __init__(self, learner: OnlineLearner):
         self.learner = learner
@@ -406,10 +388,6 @@ class FaultToleranceEngine:
 
 engine = FaultToleranceEngine(learner)
 
-
-# ---------------------------
-# FastAPI App
-# ---------------------------
 app = FastAPI(title="Adaptive Hybrid FT Engine", version="1.2.0")
 
 

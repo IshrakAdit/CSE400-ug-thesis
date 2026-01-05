@@ -88,7 +88,7 @@
 
 ---
 
-### Body 4 – Resubmit likely (low progress, low criticality, low SLA penalty)
+### Body 4 – Checkpoint likely (low progress, low criticality, low SLA penalty)
 
 ```json
 {
