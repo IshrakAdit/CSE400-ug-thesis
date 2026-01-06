@@ -31,15 +31,11 @@ from typing import Dict, Optional, Tuple, Any
 from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field, validator
 
-# ---------------------------
 # Logging
-# ---------------------------
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("ft-engine")
 
-# ---------------------------
 # Configuration
-# ---------------------------
 class Config:
     kube_enabled: bool = os.getenv("KUBE_ENABLED", "false").lower() in ("1", "true", "yes")
     kube_namespace: str = os.getenv("KUBE_NAMESPACE", "default")
@@ -281,7 +277,7 @@ class FaultToleranceEngine:
         risk: float,
         time_pressure: float,
     ) -> ActionType:
-        # guardrail: deprioritize resubmit under high risk & time pressure
+        # guardrail: deprioritizing resubmit under high risk & time pressure
         if risk >= 0.3 and time_pressure > 0.6 and ActionType.resubmit in evs:
             evs = evs.copy()
             evs[ActionType.resubmit] = evs.get(ActionType.resubmit, 0.0) - 1e-6
